@@ -64,6 +64,16 @@ export function Admin({ onCreated }: Props) {
     refreshList();
   }, []);
 
+  // ---- GROUPED (ADMIN) - organiza por categoria na ordem do catálogo
+  const groupedAdmin = useMemo(() => {
+    return items.reduce<Record<CategoriaProduto, Product[]>>((acc, p) => {
+      const cat = (p.categoria as CategoriaProduto) ?? "promocoes";
+      acc[cat] ??= [];
+      acc[cat].push(p);
+      return acc;
+    }, {} as Record<CategoriaProduto, Product[]>);
+  }, [items]);
+
   // ---- EDIT MODAL
   const [openEdit, setOpenEdit] = useState(false);
   const [editing, setEditing] = useState<Product | null>(null);
@@ -142,7 +152,6 @@ export function Admin({ onCreated }: Props) {
     if (precoNumber === null) return alert("Preço inválido (use número > 0).");
 
     try {
-      // 1) atualiza campos
       await updateProduct(editing.id, {
         nome: editNome.trim(),
         codigo: editCodigo.trim(),
@@ -150,7 +159,6 @@ export function Admin({ onCreated }: Props) {
         categoria: editCategoria,
       });
 
-      // 2) se escolheu imagem nova, faz upload
       if (editImage) {
         await uploadProductImage(editing.id, editImage);
       }
@@ -205,7 +213,12 @@ export function Admin({ onCreated }: Props) {
 
           <label style={{ display: "grid", gap: 6 }}>
             Preço de atacado
-            <input value={preco} onChange={(e) => setPreco(e.target.value)} placeholder="Ex: 29,90" inputMode="decimal" />
+            <input
+              value={preco}
+              onChange={(e) => setPreco(e.target.value)}
+              placeholder="Ex: 29,90"
+              inputMode="decimal"
+            />
           </label>
 
           <label style={{ display: "grid", gap: 6 }}>
@@ -261,43 +274,57 @@ export function Admin({ onCreated }: Props) {
         {errorList && <p style={{ padding: 12, color: "crimson" }}>{errorList}</p>}
 
         {!loadingList && !errorList && (
-          <div style={{ display: "grid", gap: 10, marginTop: 12 }}>
-            {items.map((p) => (
-              <div
-                key={p.id}
-                style={{
-                  border: "1px solid #333",
-                  borderRadius: 12,
-                  padding: 12,
-                  display: "grid",
-                  gap: 8,
-                }}
-              >
-                <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center" }}>
-                  <div>
-                    <strong>{p.nome}</strong>{" "}
-                    <span style={{ color: p.ativo ? "#7CFC00" : "#ff6b6b" }}>
-                      ({p.ativo ? "ativo" : "inativo"})
-                    </span>
-                    <div style={{ color: "#999", fontSize: 12 }}>
-                      {p.codigo} • R$ {Number(p.preco_atacado).toFixed(2)} • {CATEGORIA_LABEL[p.categoria as CategoriaProduto] ?? p.categoria}
-                    </div>
-                  </div>
+          <div style={{ display: "grid", gap: 18, marginTop: 12 }}>
+            {CATEGORIAS_ORDEM.map((cat) => {
+              const lista = groupedAdmin[cat] ?? [];
+              if (lista.length === 0) return null;
 
-                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                    <button onClick={() => openEditModal(p)} style={{ padding: "8px 10px" }}>
-                      Editar
-                    </button>
-                    <button onClick={() => handleToggleAtivo(p)} style={{ padding: "8px 10px" }}>
-                      {p.ativo ? "Ocultar" : "Reativar"}
-                    </button>
-                    <button onClick={() => handleDelete(p)} style={{ padding: "8px 10px" }}>
-                      Excluir
-                    </button>
+              return (
+                <section key={cat} style={{ borderTop: "1px solid #333", paddingTop: 12 }}>
+                  <h3 style={{ margin: "0 0 10px" }}>{CATEGORIA_LABEL[cat]}</h3>
+
+                  <div style={{ display: "grid", gap: 10 }}>
+                    {lista.map((p) => (
+                      <div
+                        key={p.id}
+                        style={{
+                          border: "1px solid #333",
+                          borderRadius: 12,
+                          padding: 12,
+                          display: "grid",
+                          gap: 8,
+                        }}
+                      >
+                        <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center" }}>
+                          <div>
+                            <strong>{p.nome}</strong>{" "}
+                            <span style={{ color: p.ativo ? "#7CFC00" : "#ff6b6b" }}>
+                              ({p.ativo ? "ativo" : "inativo"})
+                            </span>
+
+                            <div style={{ color: "#999", fontSize: 12 }}>
+                              {p.codigo} • R$ {Number(p.preco_atacado).toFixed(2)}
+                            </div>
+                          </div>
+
+                          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                            <button onClick={() => openEditModal(p)} style={{ padding: "8px 10px" }}>
+                              Editar
+                            </button>
+                            <button onClick={() => handleToggleAtivo(p)} style={{ padding: "8px 10px" }}>
+                              {p.ativo ? "Ocultar" : "Reativar"}
+                            </button>
+                            <button onClick={() => handleDelete(p)} style={{ padding: "8px 10px" }}>
+                              Excluir
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                </div>
-              </div>
-            ))}
+                </section>
+              );
+            })}
 
             {items.length === 0 && <p style={{ color: "#999" }}>Nenhum produto ainda.</p>}
           </div>
@@ -305,11 +332,7 @@ export function Admin({ onCreated }: Props) {
       </div>
 
       {/* EDIT MODAL */}
-      <Modal
-        open={openEdit}
-        title={editing ? `Editar: ${editing.nome}` : "Editar produto"}
-        onClose={closeEditModal}
-      >
+      <Modal open={openEdit} title={editing ? `Editar: ${editing.nome}` : "Editar produto"} onClose={closeEditModal}>
         {editing && (
           <div style={{ display: "grid", gap: 12 }}>
             <label style={{ display: "grid", gap: 6 }}>
@@ -351,7 +374,13 @@ export function Admin({ onCreated }: Props) {
               <img
                 src={editPreviewUrl}
                 alt="Prévia edição"
-                style={{ width: "100%", maxHeight: 260, objectFit: "cover", borderRadius: 10, border: "1px solid #333" }}
+                style={{
+                  width: "100%",
+                  maxHeight: 260,
+                  objectFit: "cover",
+                  borderRadius: 10,
+                  border: "1px solid #333",
+                }}
               />
             )}
 
