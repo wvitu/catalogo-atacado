@@ -1,4 +1,6 @@
 import type { Product } from "../api/products";
+import { CATEGORIA_LABEL } from "../constants/categories";
+
 
 type Props = {
   product: Product;
@@ -34,7 +36,10 @@ export function ProductCard({ product }: Props) {
       <p style={{ margin: "6px 0" }}>
         <strong>R$ {product.preco_atacado.toFixed(2)}</strong>
       </p>
-      <small style={{ color: "#666" }}>{product.categoria}</small>
+      <small style={{ color: "#666" }}>
+  {CATEGORIA_LABEL[product.categoria as keyof typeof CATEGORIA_LABEL] ?? product.categoria}
+</small>
+
     </div>
   );
 }

@@ -18,22 +18,37 @@ export function Catalog() {
   if (loading) return <p style={{ padding: 24 }}>Carregando produtos...</p>;
   if (error) return <p style={{ padding: 24, color: "crimson" }}>{error}</p>;
 
-  return (
-    <div style={{ padding: 24, maxWidth: 1100, margin: "0 auto" }}>
-      <h1>Catálogo de Atacado</h1>
+  const grouped = products.reduce<Record<string, Product[]>>((acc, p) => {
+  const key = p.categoria ?? "sem_categoria";
+  acc[key] = acc[key] ?? [];
+  acc[key].push(p);
+  return acc;
+}, {});
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))",
-          gap: 16,
-          marginTop: 16,
-        }}
-      >
-        {products.map((p) => (
-          <ProductCard key={p.id} product={p} />
-        ))}
-      </div>
-    </div>
-  );
+
+ return (
+  <div style={{ padding: 24, maxWidth: 1100, margin: "0 auto" }}>
+    <h1>Catálogo de Atacado</h1>
+
+    {Object.entries(grouped).map(([categoria, items]) => (
+      <section key={categoria} style={{ marginTop: 24 }}>
+        <h2 style={{ marginBottom: 12 }}>
+          {categoria}
+        </h2>
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))",
+            gap: 16,
+          }}
+        >
+          {items.map((p) => (
+            <ProductCard key={p.id} product={p} />
+          ))}
+        </div>
+      </section>
+    ))}
+  </div>
+);
 }
