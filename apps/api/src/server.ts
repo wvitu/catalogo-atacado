@@ -230,3 +230,40 @@ app.patch("/products/:id/hide", async (req, res) => {
   if (error) return res.status(500).json({ message: error.message });
   return res.json(data);
 });
+
+// Excluir produto (delete físico)
+app.delete("/products/:id", async (req, res) => {
+  const { id } = req.params;
+
+  const { error } = await supabase
+    .from("products")
+    .delete()
+    .eq("id", id);
+
+  if (error) {
+    return res.status(500).json({ message: error.message });
+  }
+
+  // 204 = sem corpo (padrão bom pra delete)
+  return res.status(204).send();
+});
+
+// Ocultar / reativar produto (soft hide)
+app.patch("/products/:id/ativo", async (req, res) => {
+  const { id } = req.params;
+  const { ativo } = req.body as { ativo: boolean };
+
+  if (typeof ativo !== "boolean") {
+    return res.status(400).json({ message: "Campo 'ativo' deve ser boolean." });
+  }
+
+  const { data, error } = await supabase
+    .from("products")
+    .update({ ativo })
+    .eq("id", id)
+    .select("*")
+    .single();
+
+  if (error) return res.status(500).json({ message: error.message });
+  return res.json(data);
+});
