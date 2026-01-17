@@ -112,11 +112,15 @@ app.post("/products", async (req, res) => {
     return res.status(400).json({ message: "Código inválido (mínimo 2 caracteres)." });
   }
 
-  // Validação: preço
-  const precoNumero = Number(precoAtacado);
-  if (Number.isNaN(precoNumero) || precoNumero < 0) {
-    return res.status(400).json({ message: "Preço de atacado inválido (use número >= 0)." });
-  }
+const precoInput = req.body.preco_atacado ?? req.body.precoAtacado;
+const precoNumero = Number(precoInput);
+
+if (!Number.isFinite(precoNumero) || precoNumero <= 0) {
+  return res.status(400).json({
+    message: "Preço de atacado inválido (use número maior que zero).",
+  });
+}
+
 
   // Validação: categoria obrigatória e controlada
   if (!isCategoriaValida(categoria)) {
