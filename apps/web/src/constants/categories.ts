@@ -1,4 +1,4 @@
-export const CATEGORIAS = [
+export const CATEGORIAS_ORDEM = [
   "promocoes",
   "bolsas_pochetes",
   "chapeus_bones_viseiras",
@@ -8,7 +8,7 @@ export const CATEGORIAS = [
   "lar_casa",
 ] as const;
 
-export type CategoriaProduto = (typeof CATEGORIAS)[number];
+export type CategoriaProduto = (typeof CATEGORIAS_ORDEM)[number];
 
 export const CATEGORIA_LABEL: Record<CategoriaProduto, string> = {
   promocoes: "Promoções",
