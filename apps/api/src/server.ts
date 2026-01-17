@@ -6,6 +6,9 @@ import cors from "cors";
 import { supabase } from "./lib/supabase";
 import { isCategoriaValida } from "./constants/categories";
 
+import multer from "multer";
+
+
 const app = express();
 
 app.use(cors());
@@ -14,6 +17,12 @@ app.use(express.json());
 app.get("/health", (_req, res) => {
   res.json({ status: "ok" });
 });
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+});
+
 
 app.get("/products", async (_req, res) => {
   const { data, error } = await supabase
@@ -27,6 +36,68 @@ app.get("/products", async (_req, res) => {
 
   return res.json(data);
 });
+
+app.post(
+  "/products/:id/image",
+  upload.single("image"),
+  async (req, res) => {
+    const { id } = req.params;
+
+    if (!req.file) {
+      return res.status(400).json({ message: "Envie um arquivo no campo 'image'." });
+    }
+
+    // validação simples de tipo (aceita jpeg/png/webp)
+    const allowed = ["image/jpeg", "image/png", "image/webp"];
+    if (!allowed.includes(req.file.mimetype)) {
+      return res.status(400).json({ message: "Formato inválido. Use JPEG, PNG ou WEBP." });
+    }
+
+    const ext =
+      req.file.mimetype === "image/png"
+        ? "png"
+        : req.file.mimetype === "image/webp"
+        ? "webp"
+        : "jpg";
+
+    // caminho no bucket (organizado por produto)
+    const filePath = `products/${id}.${ext}`;
+
+    // Faz upload no bucket
+    const { error: uploadError } = await supabase.storage
+      .from("product-images")
+      .upload(filePath, req.file.buffer, {
+        contentType: req.file.mimetype,
+        upsert: true, // permite substituir a imagem
+      });
+
+    if (uploadError) {
+      return res.status(500).json({ message: uploadError.message });
+    }
+
+    // Pega URL pública (porque bucket está public)
+    const { data: publicData } = supabase.storage
+      .from("product-images")
+      .getPublicUrl(filePath);
+
+    const publicUrl = publicData.publicUrl;
+
+    // Atualiza produto com foto_url
+    const { data, error } = await supabase
+      .from("products")
+      .update({ foto_url: publicUrl })
+      .eq("id", id)
+      .select("*")
+      .single();
+
+    if (error) {
+      return res.status(500).json({ message: error.message });
+    }
+
+    return res.json({ message: "Imagem enviada com sucesso.", product: data });
+  }
+);
+
 
 app.post("/products", async (req, res) => {
   const { nome, codigo, precoAtacado, fotoUrl, categoria } = req.body;
