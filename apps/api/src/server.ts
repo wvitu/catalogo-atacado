@@ -28,6 +28,7 @@ app.get("/products", async (_req, res) => {
   const { data, error } = await supabase
     .from("products")
     .select("*")
+    .eq("ativo", true)
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -36,6 +37,17 @@ app.get("/products", async (_req, res) => {
 
   return res.json(data);
 });
+
+app.get("/admin/products", async (_req, res) => {
+  const { data, error } = await supabase
+    .from("products")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) return res.status(500).json({ message: error.message });
+  return res.json(data);
+});
+
 
 app.post(
   "/products/:id/image",
@@ -155,4 +167,66 @@ if (!Number.isFinite(precoNumero) || precoNumero <= 0) {
 const PORT = process.env.PORT ? Number(process.env.PORT) : 3333;
 app.listen(PORT, () => {
   console.log(`API rodando em http://localhost:${PORT}`);
+});
+
+app.patch("/products/:id", async (req, res) => {
+  const { id } = req.params;
+  const { nome, codigo, categoria, foto_url } = req.body;
+
+  const precoInput = req.body.preco_atacado ?? req.body.precoAtacado;
+  const precoNumero = precoInput !== undefined ? Number(precoInput) : undefined;
+
+  if (nome !== undefined && (typeof nome !== "string" || nome.trim().length < 3)) {
+    return res.status(400).json({ message: "Nome inválido (mínimo 3 caracteres)." });
+  }
+  if (codigo !== undefined && (typeof codigo !== "string" || codigo.trim().length < 2)) {
+    return res.status(400).json({ message: "Código inválido (mínimo 2 caracteres)." });
+  }
+  if (precoNumero !== undefined && (!Number.isFinite(precoNumero) || precoNumero <= 0)) {
+    return res.status(400).json({ message: "Preço de atacado inválido (use número maior que zero)." });
+  }
+
+  // se categoria vier, valida
+  if (categoria !== undefined && !isCategoriaValida(categoria)) {
+    return res.status(400).json({
+      message:
+        "Categoria inválida. Use: promocoes, bolsas_pochetes, chapeus_bones_viseiras, vestuario, acessorios_brinquedos_infantil, mais_vendidos, lar_casa",
+    });
+  }
+
+  const updatePayload: any = {};
+  if (nome !== undefined) updatePayload.nome = nome.trim();
+  if (codigo !== undefined) updatePayload.codigo = codigo.trim();
+  if (precoNumero !== undefined) updatePayload.preco_atacado = precoNumero;
+  if (categoria !== undefined) updatePayload.categoria = categoria;
+  if (foto_url !== undefined) updatePayload.foto_url = foto_url;
+
+  const { data, error } = await supabase
+    .from("products")
+    .update(updatePayload)
+    .eq("id", id)
+    .select("*")
+    .single();
+
+  if (error) return res.status(500).json({ message: error.message });
+  return res.json(data);
+});
+
+app.patch("/products/:id/hide", async (req, res) => {
+  const { id } = req.params;
+  const { ativo } = req.body;
+
+  if (typeof ativo !== "boolean") {
+    return res.status(400).json({ message: "Campo 'ativo' deve ser boolean." });
+  }
+
+  const { data, error } = await supabase
+    .from("products")
+    .update({ ativo })
+    .eq("id", id)
+    .select("*")
+    .single();
+
+  if (error) return res.status(500).json({ message: error.message });
+  return res.json(data);
 });
