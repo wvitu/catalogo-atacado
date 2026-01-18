@@ -19,7 +19,7 @@ export function ProductCard({ product }: Props) {
         <div
           style={{
             width: "100%",
-            height: 200,
+            aspectRatio: "1 / 1",
             background: "#f2f2f2",
             borderRadius: 8,
             display: "grid",

@@ -1,24 +1,23 @@
-import { useState } from "react";
+import { Routes, Route, Link } from "react-router-dom";
 import { Catalog } from "./pages/Catalog";
 import { Admin } from "./pages/Admin";
+import { PrintCatalog } from "./pages/PrintCatalog";
 
-function App() {
-  const [page, setPage] = useState<"catalog" | "admin">("catalog");
-
+export default function App() {
   return (
     <>
       <div style={{ padding: 16, maxWidth: 1100, margin: "0 auto", display: "flex", gap: 8 }}>
-        <button onClick={() => setPage("catalog")}>Ver Catálogo</button>
-        <button onClick={() => setPage("admin")}>Cadastrar Produto</button>
+        <Link to="/">Ver Catálogo</Link>
+        <Link to="/admin">Cadastrar Produto</Link>
+        <Link to="/print" target="_blank">Gerar PDF</Link>
       </div>
 
-      {page === "catalog" ? (
-        <Catalog />
-      ) : (
-        <Admin onCreated={() => setPage("catalog")} />
-      )}
+      <Routes>
+        <Route path="/" element={<Catalog />} />
+        <Route path="/admin" element={<Admin />} />
+        <Route path="/print" element={<PrintCatalog />} />
+      </Routes>
     </>
   );
 }
 
-export default App;
