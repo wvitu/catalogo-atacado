@@ -10,6 +10,7 @@ import {
 } from "../api/products";
 import { CATEGORIAS_ORDEM, CATEGORIA_LABEL, type CategoriaProduto } from "../constants/categories";
 import { Modal } from "../components/Modal";
+import { useSettings } from "../contexts/SettingsContext";
 
 type Props = {
   onCreated?: () => void;
@@ -28,7 +29,45 @@ function parsePreco(preco: string): number | null {
 }
 
 export function Admin({ onCreated }: Props) {
-  // ---- CREATE
+  // ===== SETTINGS =====
+  const { settings, loading: loadingSettings, error: errorSettings, refresh, save } = useSettings();
+
+  const [companyName, setCompanyName] = useState("");
+  const [catalogName, setCatalogName] = useState("");
+  const [contactPhone, setContactPhone] = useState("");
+
+  const [savingSettings, setSavingSettings] = useState(false);
+  const [settingsMsg, setSettingsMsg] = useState<string | null>(null);
+  const [settingsErr, setSettingsErr] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!settings) return;
+    setCompanyName(settings.company_name ?? "");
+    setCatalogName(settings.catalog_name ?? "");
+    setContactPhone(settings.contact_phone ?? "");
+  }, [settings]);
+
+  async function handleSaveSettings() {
+    setSettingsMsg(null);
+    setSettingsErr(null);
+
+    try {
+      setSavingSettings(true);
+      await save({
+        company_name: companyName,
+        catalog_name: catalogName,
+        contact_phone: contactPhone || null,
+      });
+      setSettingsMsg("Configurações salvas com sucesso!");
+      await refresh();
+    } catch (e) {
+      setSettingsErr(e instanceof Error ? e.message : "Erro ao salvar configurações");
+    } finally {
+      setSavingSettings(false);
+    }
+  }
+
+  // ===== CREATE =====
   const [nome, setNome] = useState("");
   const [codigo, setCodigo] = useState("");
   const [preco, setPreco] = useState("");
@@ -41,7 +80,7 @@ export function Admin({ onCreated }: Props) {
 
   const previewUrl = useMemo(() => (image ? URL.createObjectURL(image) : null), [image]);
 
-  // ---- LIST (ADMIN)
+  // ===== LIST (ADMIN) =====
   const [items, setItems] = useState<Product[]>([]);
   const [loadingList, setLoadingList] = useState(true);
   const [errorList, setErrorList] = useState<string | null>(null);
@@ -64,7 +103,7 @@ export function Admin({ onCreated }: Props) {
     refreshList();
   }, []);
 
-  // ---- GROUPED (ADMIN) - organiza por categoria na ordem do catálogo
+  // ===== GROUPED (ADMIN) =====
   const groupedAdmin = useMemo(() => {
     return items.reduce<Record<CategoriaProduto, Product[]>>((acc, p) => {
       const cat = (p.categoria as CategoriaProduto) ?? "promocoes";
@@ -74,7 +113,7 @@ export function Admin({ onCreated }: Props) {
     }, {} as Record<CategoriaProduto, Product[]>);
   }, [items]);
 
-  // ---- EDIT MODAL
+  // ===== EDIT MODAL =====
   const [openEdit, setOpenEdit] = useState(false);
   const [editing, setEditing] = useState<Product | null>(null);
 
@@ -102,6 +141,7 @@ export function Admin({ onCreated }: Props) {
     setEditImage(null);
   }
 
+  // ===== HANDLERS =====
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setMsg(null);
@@ -194,10 +234,49 @@ export function Admin({ onCreated }: Props) {
   return (
     <div style={{ padding: 24, maxWidth: 1100, margin: "0 auto" }}>
       <h1>Admin</h1>
-      <p style={{ color: "#666" }}>Cadastro + gerenciamento (editar/ocultar/excluir).</p>
+      <p style={{ color: "#666" }}>Cadastro + gerenciamento (editar/ocultar/excluir) + dados do catálogo.</p>
+
+      {/* SETTINGS */}
+      <div style={{ border: "1px solid #333", borderRadius: 12, padding: 16, marginTop: 12 }}>
+        <h2 style={{ marginTop: 0 }}>Configurações do catálogo</h2>
+
+        {loadingSettings && <p>Carregando configurações...</p>}
+        {errorSettings && <p style={{ color: "crimson" }}>{errorSettings}</p>}
+
+        {!loadingSettings && (
+          <div style={{ display: "grid", gap: 12 }}>
+            <label style={{ display: "grid", gap: 6 }}>
+              Nome da empresa
+              <input value={companyName} onChange={(e) => setCompanyName(e.target.value)} placeholder="Ex: Moda Praia GT" />
+            </label>
+
+            <label style={{ display: "grid", gap: 6 }}>
+              Nome do catálogo
+              <input value={catalogName} onChange={(e) => setCatalogName(e.target.value)} placeholder="Ex: Catálogo Atacado 2026" />
+            </label>
+
+            <label style={{ display: "grid", gap: 6 }}>
+              Telefone para contato
+              <input value={contactPhone} onChange={(e) => setContactPhone(e.target.value)} placeholder="Ex: (84) 99999-9999" />
+            </label>
+
+            {settingsErr && <p style={{ color: "crimson" }}>{settingsErr}</p>}
+            {settingsMsg && <p style={{ color: "green" }}>{settingsMsg}</p>}
+
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+              <button onClick={refresh} style={{ padding: "8px 10px" }}>
+                Recarregar
+              </button>
+              <button disabled={savingSettings} onClick={handleSaveSettings} style={{ padding: "8px 10px" }}>
+                {savingSettings ? "Salvando..." : "Salvar configurações"}
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* CREATE */}
-      <div style={{ border: "1px solid #333", borderRadius: 12, padding: 16, marginTop: 12 }}>
+      <div style={{ border: "1px solid #333", borderRadius: 12, padding: 16, marginTop: 16 }}>
         <h2 style={{ marginTop: 0 }}>Cadastrar produto</h2>
 
         <form onSubmit={handleSubmit} style={{ display: "grid", gap: 12 }}>
@@ -213,12 +292,7 @@ export function Admin({ onCreated }: Props) {
 
           <label style={{ display: "grid", gap: 6 }}>
             Preço de atacado
-            <input
-              value={preco}
-              onChange={(e) => setPreco(e.target.value)}
-              placeholder="Ex: 29,90"
-              inputMode="decimal"
-            />
+            <input value={preco} onChange={(e) => setPreco(e.target.value)} placeholder="Ex: 29,90" inputMode="decimal" />
           </label>
 
           <label style={{ display: "grid", gap: 6 }}>
