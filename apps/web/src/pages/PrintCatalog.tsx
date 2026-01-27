@@ -65,7 +65,7 @@ export function PrintCatalog() {
   }, [grouped]);
 
   const totalPages = pages.length;
-  const generatedAt = useMemo(() => new Date(), []);
+
 
   return (
     <div className="print-shell">
@@ -101,14 +101,16 @@ export function PrintCatalog() {
                 <div className="company-name">{companyName}</div>
                 <div className="catalog-name">{catalogName}</div>
               </div>
+
               <div className="header-right">
-                <div className="header-meta">
-                  <span>Gerado em:</span>{" "}
-                  <b>{generatedAt.toLocaleString("pt-BR")}</b>
-                </div>
-                {phone ? <div className="header-meta">Contato: <b>{phone}</b></div> : null}
+                {phone ? (
+                  <div className="header-meta">
+                    Contato: <b>{phone}</b>
+                  </div>
+                ) : null}
               </div>
             </header>
+
 
             {/* Destaque extra só na primeira página */}
             {idx === 0 && (
