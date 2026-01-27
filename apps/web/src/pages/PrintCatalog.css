@@ -1,205 +1,127 @@
-/* ===== TELA (preview) ===== */
-.print-shell {
-  padding: 16px;
+/* Preview na tela também fica ok */
+.print-wrap {
+  padding: 8px;
 }
 
-.print-toolbar {
-  display: flex;
-  justify-content: space-between;
-  gap: 16px;
-  align-items: center;
-  margin-bottom: 16px;
-}
-
-.print-toolbar .hint {
-  font-size: 12px;
-  color: #999;
-  margin-top: 4px;
-}
-
-.btn {
-  padding: 10px 12px;
-  border-radius: 10px;
-  border: 1px solid #333;
-  background: #111;
-  color: #fff;
-  cursor: pointer;
-}
-
-.error {
-  color: crimson;
-}
-
-/* ===== PÁGINA ===== */
-.print-page {
-  width: 210mm;
-  min-height: 297mm;
-  padding: 12mm;
-  box-sizing: border-box;
-
-  background: #fff;
-  color: #111;
-  border: 1px solid #ddd;
-  border-radius: 10px;
-
-  margin: 0 auto 18px;
-  display: flex;
-  flex-direction: column;
-}
-
-.page-header {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  align-items: flex-start;
-  border-bottom: 1px solid #ddd;
-  padding-bottom: 8px;
-  margin-bottom: 10px;
-}
-
-.company-name {
-  font-size: 18px;
-  font-weight: 800;
-  line-height: 1.2;
-}
-
-.catalog-name {
-  font-size: 13px;
-  color: #555;
-  margin-top: 2px;
-}
-
-.header-meta {
-  font-size: 12px;
-  color: #444;
-  text-align: right;
-}
-
-.cover {
-  margin: 6px 0 10px;
-  padding: 10px 12px;
-  border: 1px solid #eee;
-  border-radius: 10px;
-  background: #fafafa;
-}
-
-.cover h1 {
-  margin: 0;
-  font-size: 22px;
-}
-
-.cover-sub {
-  margin: 4px 0 0;
-  color: #666;
-  font-size: 13px;
-}
-
-.category-title {
-  margin: 10px 0 8px;
-  font-size: 16px;
-  font-weight: 800;
-}
-
-/* ===== GRID (20 itens: 4 colunas x 5 linhas) ===== */
-.products-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
-  flex: 1;
-}
-
-.product-card {
-  border: 1px solid #ddd;
-  border-radius: 12px;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-}
-
-/* imagem quadrada */
-.img-wrap {
-  aspect-ratio: 1 / 1;
-  background: #fff;
+/* Capa: força a próxima seção começar na página seguinte */
+.print-cover {
   display: flex;
   align-items: center;
   justify-content: center;
+  min-height: 90vh;
+  page-break-after: always;
+  break-after: page;
 }
 
-.img-wrap img {
+.print-cover-box {
   width: 100%;
-  height: 100%;
-  object-fit: contain; /* mostra o produto inteiro */
-  display: block;
+  border: 1px solid #ddd;
+  border-radius: 16px;
+  padding: 28px;
 }
 
-.no-img {
-  color: #777;
-  font-size: 12px;
-}
-
-.info {
-  padding: 8px 8px 10px;
-  display: grid;
-  gap: 4px;
-}
-
-.title {
-  font-size: 12px;
+.print-cover-title {
+  font-size: 28px;
   font-weight: 800;
-  line-height: 1.2;
-
-  /* corta títulos grandes para não quebrar layout */
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  min-height: 28px;
+  margin-bottom: 8px;
 }
 
-.meta {
-  font-size: 11px;
-  color: #444;
+.print-cover-company {
+  font-size: 18px;
+  font-weight: 600;
+  opacity: 0.9;
 }
 
-.page-footer {
-  border-top: 1px solid #ddd;
+.print-cover-contact {
   margin-top: 10px;
-  padding-top: 8px;
-  display: flex;
-  justify-content: space-between;
-  gap: 10px;
-  font-size: 12px;
-  color: #444;
+  font-size: 14px;
+  opacity: 0.8;
 }
 
-/* ===== IMPRESSÃO ===== */
+.print-section {
+  margin-top: 10px;
+}
+
+.print-category-title {
+  text-align: center;
+  font-size: 18px;
+  font-weight: 800;
+  margin: 12px 0 10px;
+}
+
+/* --- PRINT RULES --- */
 @media print {
-  .no-print {
-    display: none !important;
+  @page {
+    size: A4;
+    margin: 10mm;
   }
 
-  /* Remove “cara de preview” */
-  .print-shell {
+  .print-wrap {
     padding: 0;
   }
 
-  .print-page {
-    border: none;
-    border-radius: 0;
-    margin: 0;
-    box-shadow: none;
-    page-break-after: always;
-    break-after: page;
+  /* grid com alvo ~20 itens/página (4 colunas x ~5 linhas) */
+  .print-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 3mm;
   }
 
-  .print-page:last-child {
-    page-break-after: auto;
-    break-after: auto;
+  /* NÃO deixa quebrar um card entre páginas */
+  .print-card {
+    break-inside: avoid;
+    page-break-inside: avoid;
+
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    overflow: hidden;
+
+    /* altura padrão do card (ajuste fino se quiser) */
+    height: 48mm;
+
+    display: grid;
+    grid-template-rows: 30mm 1fr;
+    background: #fff;
   }
 
-  /* Controle de página A4 */
-  @page {
-    size: A4;
-    margin: 0;
+  .print-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .print-img-placeholder {
+    width: 100%;
+    height: 100%;
+    display: grid;
+    place-items: center;
+    font-size: 10px;
+    color: #666;
+    background: #f2f2f2;
+  }
+
+  .print-body {
+    padding: 2.5mm;
+    display: grid;
+    gap: 1mm;
+  }
+
+  /* trava altura do nome pra não crescer e bagunçar a página */
+  .print-name {
+    font-size: 10pt;
+    font-weight: 800;
+    line-height: 1.1;
+
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    min-height: 22pt;
+  }
+
+  .print-meta {
+    font-size: 8pt;
+    color: #444;
   }
 }
