@@ -1,160 +1,205 @@
-.print-root {
+/* ===== TELA (preview) ===== */
+.print-shell {
   padding: 16px;
-  max-width: 1100px;
-  margin: 0 auto;
 }
 
 .print-toolbar {
   display: flex;
-  gap: 8px;
-  justify-content: flex-end;
-  margin-bottom: 12px;
-}
-
-.print-toolbar button {
-  padding: 8px 10px;
-  border-radius: 10px;
-  border: 1px solid #444;
-  background: transparent;
-  color: inherit;
-  cursor: pointer;
-}
-
-.print-page {
-  border: 1px solid #333;
-  border-radius: 12px;
-  padding: 16px;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
   margin-bottom: 16px;
 }
 
-.print-header {
+.print-toolbar .hint {
+  font-size: 12px;
+  color: #999;
+  margin-top: 4px;
+}
+
+.btn {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #333;
+  background: #111;
+  color: #fff;
+  cursor: pointer;
+}
+
+.error {
+  color: crimson;
+}
+
+/* ===== PÁGINA ===== */
+.print-page {
+  width: 210mm;
+  min-height: 297mm;
+  padding: 12mm;
+  box-sizing: border-box;
+
+  background: #fff;
+  color: #111;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+
+  margin: 0 auto 18px;
+  display: flex;
+  flex-direction: column;
+}
+
+.page-header {
   display: flex;
   justify-content: space-between;
   gap: 12px;
-  align-items: flex-end;
-  margin-bottom: 12px;
+  align-items: flex-start;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 8px;
+  margin-bottom: 10px;
 }
 
-.print-header h1 {
+.company-name {
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.catalog-name {
+  font-size: 13px;
+  color: #555;
+  margin-top: 2px;
+}
+
+.header-meta {
+  font-size: 12px;
+  color: #444;
+  text-align: right;
+}
+
+.cover {
+  margin: 6px 0 10px;
+  padding: 10px 12px;
+  border: 1px solid #eee;
+  border-radius: 10px;
+  background: #fafafa;
+}
+
+.cover h1 {
   margin: 0;
   font-size: 22px;
 }
 
-.print-sub {
-  color: #aaa;
-  font-size: 12px;
+.cover-sub {
+  margin: 4px 0 0;
+  color: #666;
+  font-size: 13px;
 }
 
-.print-pageNum {
-  color: #aaa;
-  font-size: 12px;
-  white-space: nowrap;
+.category-title {
+  margin: 10px 0 8px;
+  font-size: 16px;
+  font-weight: 800;
 }
 
-.print-grid {
+/* ===== GRID (20 itens: 4 colunas x 5 linhas) ===== */
+.products-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr); /* 4 colunas => 20 itens = 5 linhas */
-  gap: 12px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  flex: 1;
 }
 
-/* Card quadrado */
-.pcard {
-  border: 1px solid #333;
+.product-card {
+  border: 1px solid #ddd;
   border-radius: 12px;
   overflow: hidden;
-  background: rgba(255, 255, 255, 0.02);
+  display: flex;
+  flex-direction: column;
 }
 
-.pcard-imgWrap {
-  width: 100%;
-  aspect-ratio: 1 / 1; /* quadrado */
-  background: #111;
-  display: grid;
-  place-items: center;
-  overflow: hidden;
+/* imagem quadrada */
+.img-wrap {
+  aspect-ratio: 1 / 1;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.pcard-img {
+.img-wrap img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain; /* mostra o produto inteiro */
   display: block;
 }
 
-.pcard-noimg {
-  color: #888;
+.no-img {
+  color: #777;
   font-size: 12px;
 }
 
-.pcard-body {
-  padding: 10px;
+.info {
+  padding: 8px 8px 10px;
+  display: grid;
+  gap: 4px;
 }
 
-.pcard-name {
-  font-weight: 700;
-  font-size: 14px;
-  margin-bottom: 6px;
+.title {
+  font-size: 12px;
+  font-weight: 800;
   line-height: 1.2;
+
+  /* corta títulos grandes para não quebrar layout */
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  min-height: 28px;
 }
 
-.pcard-meta {
-  display: grid;
-  gap: 2px;
-  font-size: 12px;
-  color: #ddd;
-  margin-bottom: 6px;
-}
-
-.pcard-cat {
+.meta {
   font-size: 11px;
-  color: #aaa;
+  color: #444;
 }
 
-/* IMPRESSÃO */
+.page-footer {
+  border-top: 1px solid #ddd;
+  margin-top: 10px;
+  padding-top: 8px;
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 12px;
+  color: #444;
+}
+
+/* ===== IMPRESSÃO ===== */
 @media print {
-  /* remove “barra” e molduras desnecessárias */
-  .print-toolbar {
+  .no-print {
     display: none !important;
   }
 
-  .print-root {
-    max-width: none;
+  /* Remove “cara de preview” */
+  .print-shell {
     padding: 0;
   }
 
   .print-page {
     border: none;
     border-radius: 0;
-    padding: 0;
     margin: 0;
-    break-after: page;
+    box-shadow: none;
     page-break-after: always;
+    break-after: page;
   }
 
   .print-page:last-child {
-    break-after: auto;
     page-break-after: auto;
+    break-after: auto;
   }
 
-  /* dá um ar mais "PDF limpo" */
-  body {
-    background: #fff !important;
-    color: #000 !important;
-  }
-
-  .pcard {
-    border: 1px solid #999;
-    background: #fff;
-  }
-
-  .pcard-noimg,
-  .print-sub,
-  .print-pageNum,
-  .pcard-cat {
-    color: #333 !important;
+  /* Controle de página A4 */
+  @page {
+    size: A4;
+    margin: 0;
   }
 }
