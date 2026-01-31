@@ -11,12 +11,20 @@ export function PrintCatalog() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // ✅ Força fundo branco somente na rota /print
+  useEffect(() => {
+    document.body.classList.add("print-page");
+    return () => {
+      document.body.classList.remove("print-page");
+    };
+  }, []);
+
   useEffect(() => {
     (async () => {
       try {
         setError(null);
         setLoading(true);
-        const data = await getProducts(); // já vem só ativo pelo seu endpoint /products
+        const data = await getProducts(); // já vem só ativo pelo endpoint /products
         setItems(data);
       } catch (e) {
         setError(e instanceof Error ? e.message : "Erro ao carregar produtos");
@@ -76,7 +84,9 @@ export function PrintCatalog() {
                   <div className="print-body">
                     <div className="print-name">{p.nome}</div>
                     <div className="print-meta">Cód: {p.codigo}</div>
-                    <div className="print-meta">Preço: R$ {Number(p.preco_atacado).toFixed(2)}</div>
+                    <div className="print-meta">
+                      Preço: R$ {Number(p.preco_atacado).toFixed(2)}
+                    </div>
                   </div>
                 </article>
               ))}

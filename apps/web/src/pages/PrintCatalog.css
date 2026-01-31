@@ -14,28 +14,33 @@
 }
 
 .print-cover-box {
-  width: 100%;
+   width: 100%;
   border: 1px solid #ddd;
   border-radius: 16px;
   padding: 28px;
+  text-align: center; /* <- centraliza */
+  color: #000; 
 }
 
 .print-cover-title {
-  font-size: 28px;
+font-size: 28px;
   font-weight: 800;
   margin-bottom: 8px;
+  color: #000;  
 }
 
 .print-cover-company {
-  font-size: 18px;
+   font-size: 18px;
   font-weight: 600;
-  opacity: 0.9;
+  opacity: 1;         /* <- sem “acinzentado” */
+  color: #000;
 }
 
 .print-cover-contact {
   margin-top: 10px;
   font-size: 14px;
-  opacity: 0.8;
+  opacity: 1;
+  color: #000;
 }
 
 .print-section {
@@ -43,10 +48,10 @@
 }
 
 .print-category-title {
-  text-align: center;
-  font-size: 18px;
+   text-align: center;
+  font-size: 14px;   /* antes 18px */
   font-weight: 800;
-  margin: 12px 0 10px;
+  margin: 8px 0 8px;
 }
 
 /* --- PRINT RULES --- */
@@ -117,11 +122,12 @@
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
-    min-height: 22pt;
+    min-height: 16pt;
   }
 
   .print-meta {
-    font-size: 8pt;
-    color: #444;
+    font-size: 9pt;
+    color: #000;
+    opacity: 1;
   }
 }
