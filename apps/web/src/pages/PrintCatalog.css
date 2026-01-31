@@ -1,6 +1,9 @@
 /* Preview na tela também fica ok */
 .print-wrap {
   padding: 8px;
+  background: #fff;
+  color: #000;
+  min-height: 100vh;
 }
 
 /* Capa: força a próxima seção começar na página seguinte */
@@ -14,25 +17,26 @@
 }
 
 .print-cover-box {
-   width: 100%;
+  width: 100%;
   border: 1px solid #ddd;
   border-radius: 16px;
   padding: 28px;
-  text-align: center; /* <- centraliza */
-  color: #000; 
+  text-align: center;
+  color: #000;
+  background: #fff;
 }
 
 .print-cover-title {
-font-size: 28px;
+  font-size: 28px;
   font-weight: 800;
   margin-bottom: 8px;
-  color: #000;  
+  color: #000;
 }
 
 .print-cover-company {
-   font-size: 18px;
+  font-size: 18px;
   font-weight: 600;
-  opacity: 1;         /* <- sem “acinzentado” */
+  opacity: 1;
   color: #000;
 }
 
@@ -48,10 +52,81 @@ font-size: 28px;
 }
 
 .print-category-title {
-   text-align: center;
-  font-size: 14px;   /* antes 18px */
+  text-align: center;
+  font-size: 14px;
   font-weight: 800;
   margin: 8px 0 8px;
+}
+
+/* Preview (tela) – mantém o grid organizado também antes do Ctrl+P */
+.print-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+.print-card {
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #fff;
+
+  /* evita sumir linhas por altura travada */
+  display: grid;
+  grid-template-rows: 150px 1fr;
+}
+
+.print-img {
+  width: 100%;
+  height: 100%;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* ✅ FOTO INTEIRA NO BOX (sem recorte) */
+.print-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain; /* <-- principal mudança */
+  object-position: center;
+  display: block;
+  background: #fff;
+}
+
+.print-img-placeholder {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  color: #666;
+  background: #f2f2f2;
+}
+
+.print-body {
+  padding: 10px 12px;
+  display: grid;
+  gap: 6px;
+}
+
+.print-name {
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.2;
+
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.print-meta {
+  font-size: 12px;
+  color: #000;
+  opacity: 1;
 }
 
 /* --- PRINT RULES --- */
@@ -61,8 +136,19 @@ font-size: 28px;
     margin: 10mm;
   }
 
+  html,
+  body {
+    background: #fff !important;
+    color: #000 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
   .print-wrap {
     padding: 0;
+    background: #fff !important;
+    color: #000 !important;
+    min-height: auto;
   }
 
   /* grid com alvo ~20 itens/página (4 colunas x ~5 linhas) */
@@ -89,11 +175,24 @@ font-size: 28px;
     background: #fff;
   }
 
+  .print-img {
+    width: 100%;
+    height: 100%;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  /* ✅ FOTO INTEIRA NO BOX (sem recorte) */
   .print-img img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain; /* <-- era cover */
+    object-position: center;
     display: block;
+    background: #fff;
   }
 
   .print-img-placeholder {
@@ -114,7 +213,7 @@ font-size: 28px;
 
   /* trava altura do nome pra não crescer e bagunçar a página */
   .print-name {
-    font-size: 10pt;
+    font-size: 8pt; /* um pouco menor pra sobrar espaço */
     font-weight: 800;
     line-height: 1.1;
 
@@ -122,12 +221,16 @@ font-size: 28px;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
-    min-height: 16pt;
+    min-height: 14pt;
   }
 
+  /* ✅ garante que o preço apareça (sem sumir por altura) */
   .print-meta {
-    font-size: 9pt;
+    font-size: 7.5pt;
     color: #000;
     opacity: 1;
+    display: block;
+    visibility: visible;
+    line-height: 1.15;
   }
 }
